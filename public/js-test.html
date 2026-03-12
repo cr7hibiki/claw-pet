@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS 测试</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        #test-output { background: #f5f5f5; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>JavaScript 测试</h1>
+    <div id="test-output"></div>
+    
+    <script>
+        console.log('JavaScript test started');
+        const output = document.getElementById('test-output');
+        
+        try {
+            output.innerHTML += '<div>✓ JavaScript 执行正常</div>';
+            
+            // 测试React加载
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/react@18/umd/react.development.js';
+            script.onload = () => {
+                console.log('React loaded successfully');
+                output.innerHTML += '<div class="success">✓ React 加载成功</div>';
+            };
+            script.onerror = () => {
+                console.error('React load failed');
+                output.innerHTML += '<div class="error">✗ React 加载失败</div>';
+            };
+            document.head.appendChild(script);
+            
+        } catch (error) {
+            console.error('JavaScript test failed:', error);
+            output.innerHTML += '<div class="error">✗ JavaScript 错误: ' + error.message + '</div>';
+        }
+    </script>
+</body>
+</html>

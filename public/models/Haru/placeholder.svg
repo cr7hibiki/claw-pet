@@ -1,0 +1,8 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="400" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="200" cy="200" r="80" fill="rgba(255,255,255,0.2)"/>
+  <circle cx="170" cy="180" r="15" fill="rgba(255,255,255,0.8)"/>
+  <circle cx="230" cy="180" r="15" fill="rgba(255,255,255,0.8)"/>
+  <path d="M 160 240 Q 200 280 240 240" stroke="rgba(255,255,255,0.8)" stroke-width="5" fill="none"/>
+  <text x="200" y="350" font-family="Arial" font-size="20" fill="rgba(255,255,255,0.8)" text-anchor="middle">🦞 Live2D Model</text>
+</svg>

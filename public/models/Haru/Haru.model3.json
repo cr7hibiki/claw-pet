@@ -1,0 +1,10 @@
+{
+  "Version": 3,
+  "FileReferences": {
+    "Moc": "placeholder.moc3",
+    "Textures": [
+      "placeholder.png"
+    ]
+  },
+  "Groups": []
+}

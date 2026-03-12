@@ -1,0 +1,24 @@
+[package]
+name = "claw-pet"
+version = "1.0.0"
+description = "A desktop pet powered by OpenClaw and Live2D"
+authors = ["cr7hi"]
+license = "MIT"
+repository = ""
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+serde_json = "1"
+serde = { version = "1", features = ["derive"] }
+tauri = { version = "2", features = [] }
+tauri-plugin-websocket = "2"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[lints.rust]
+unexpected_cfgs = { level = "deny", check-cfg = ['cfg(mobile)', 'cfg(desktop)'] }

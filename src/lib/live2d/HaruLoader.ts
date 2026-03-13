@@ -3,17 +3,14 @@ import * as PIXI from 'pixi.js';
 export class HaruLive2DLoader {
   private app: PIXI.Application | null = null;
   private placeholder: PIXI.Sprite | null = null;
-  private canvas: HTMLCanvasElement | null = null;
   private modelLoaded: boolean = false;
-
+ 
   constructor(canvas: HTMLCanvasElement) {
-    this.canvas = canvas;
     // 初始化 Pixi 应用
     this.app = new PIXI.Application({
       view: canvas,
       width: window.innerWidth,
       height: window.innerHeight,
-      transparent: true,
       backgroundAlpha: 0,
       resolution: window.devicePixelRatio || 1,
       autoDensity: true,
@@ -31,16 +28,16 @@ export class HaruLive2DLoader {
 
         if (this.app) {
           this.app.stage.removeChildren();
-          this.app.stage.addChild(live2dModel);
+          this.app.stage.addChild(live2dModel as any);
           
           // 调整模型大小和位置
           const scale = Math.min(
-            (window.innerWidth * 0.8) / live2dModel.width,
-            (window.innerHeight * 0.8) / live2dModel.height
+            (window.innerWidth * 0.8) / (live2dModel as any).width,
+            (window.innerHeight * 0.8) / (live2dModel as any).height
           );
           live2dModel.scale.set(scale);
-          live2dModel.x = (window.innerWidth - live2dModel.width * scale) / 2;
-          live2dModel.y = (window.innerHeight - live2dModel.height * scale) / 2;
+          live2dModel.x = (window.innerWidth - (live2dModel as any).width * scale) / 2;
+          live2dModel.y = (window.innerHeight - (live2dModel as any).height * scale) / 2;
         }
 
         this.modelLoaded = true;
@@ -81,7 +78,7 @@ export class HaruLive2DLoader {
     }
   }
 
-  update(deltaTime: number): void {
+  update(_deltaTime: number): void {
     // 占位符不需要更新
     if (this.placeholder) {
       this.placeholder.rotation += 0.001;

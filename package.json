@@ -24,7 +24,9 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.10.1",
-    "@vitejs/plugin-react": "^4.2.0"
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.2.0",
+    "typescript": "^5.9.3"
   },
   "optionalDependencies": {
     "@live2d/cubism": "latest",

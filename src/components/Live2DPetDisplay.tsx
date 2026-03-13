@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { HaruLive2DLoader } from '../lib/live2d/HaruLoader';
 import { useStore } from '../state/store';
 
@@ -7,7 +7,7 @@ interface PetDisplayProps {
   modelName: string;
 }
 
-export function PetDisplay({ modelPath = '/models/Haru', modelName = 'Haru' }: PetDisplayProps) {
+export function Live2DPetDisplay({ modelPath = '/models/Haru', modelName = 'Haru' }: PetDisplayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const live2dRef = useRef<HaruLive2DLoader | null>(null);
   const { currentMessage } = useStore();
@@ -46,16 +46,14 @@ export function PetDisplay({ modelPath = '/models/Haru', modelName = 'Haru' }: P
             live2dRef.current?.setExpression('happy');
           }
           
+          requestAnimationFrame(animate);
+          
           return () => {
             if (live2dRef.current) {
-              live2dRef.current.update(deltaTime);
+              live2dRef.current.destroy();
             }
           };
-          
-          requestAnimationFrame(animate);
         }
-
-        loadModel();
       } catch (error) {
         console.error('Failed to load Live2D model:', error);
       }
@@ -90,11 +88,10 @@ export function PetDisplay({ modelPath = '/models/Haru', modelName = 'Haru' }: P
         onClick={handlePetClick}
       />
       
-      {showBubble && (
-        <MessageBubble 
-          content={currentMessage}
-          onClick={handleBubbleClick}
-        />
+      {showBubble && currentMessage && (
+        <div className="message-bubble" onClick={handleBubbleClick}>
+          {currentMessage}
+        </div>
       )}
     </div>
   );

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live2D 功能测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: white;
+            padding: 20px;
+        }
+        
+        .test-container {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .test-section {
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .test-section h2 {
+            margin-top: 0;
+            color: #64b5f6;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .test-name {
+            font-weight: 500;
+        }
+        
+        .test-status {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .test-status.pass {
+            background: rgba(76, 175, 80, 0.4);
+            color: #81c784;
+        }
+        
+        .test-status.fail {
+            background: rgba(244, 67, 54, 0.4);
+            color: #f44336;
+        }
+        
+        .test-status.running {
+            background: rgba(255, 152, 0, 0.4);
+            color: #ff9800;
+        }
+        
+        .test-status.pending {
+            background: rgba(158, 158, 158, 0.4);
+            color: #9e9e9e;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #FF4500;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #e03d00;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .console-output {
+            background: #1e1e1e;
+            color: #a8a29e;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid #444;
+        }
+        
+        .console-output h3 {
+            margin-top: 0;
+            color: #64b5f6;
+            font-size: 14px;
+        }
+        
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .log-time {
+            color: #9e9e9e;
+            margin-right: 10px;
+        }
+        
+        .log-message {
+            color: #e8e8e3;
+        }
+        
+        .log-success {
+            color: #81c784;
+        }
+        
+        .log-error {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🦞 Live2D 功能测试</h1>
+        
+        <div class="test-section">
+            <h2>📦 模型文件测试</h2>
+            
+            <div class="test-item">
+                <span class="test-name">Haru.moc3 文件</span>
+                <span class="test-status pending" id="test-moc3">待测试</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-moc3"></div></div>
+            
+            <div class="test-item">
+                <span class="test-name">纹理文件</span>
+                <span class="test-status pending" id="test-textures">待测试</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-textures"></div></div>
+            
+            <div class="test-item">
+                <span class="test-name">动作文件</span>
+                <span class="test-status pending" id="test-motions">待测试</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-motions"></div></div>
+            
+            <div class="test-item">
+                <span class="test-name">表情文件</span>
+                <span class="test-status pending" id="test-expressions">待测试</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-expressions"></div></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🎨 渲染引擎测试</h2>
+            
+            <div class="test-item">
+                <span class="test-name">PIXI.js 加载</span>
+                <span class="test-status pending" id="test-pixi">待测试</span>
+            </div>
+            
+            <div class="test-item">
+                <span class="test-name">Live2D 加载器</span>
+                <span class="test-status pending" id="test-live2d">待测试</span>
+            </div>
+            
+            <div class="test-item">
+                <span class="test-name">WebGL 支持</span>
+                <span class="test-status pending" id="test-webgl">待测试</span>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🎭 功能特性测试</h2>
+            
+            <div class="test-item">
+                <span class="test-name">动作播放</span>
+                <span class="test-status pending" id="test-motion">待测试</span>
+            </div>
+            
+            <div class="test-item">
+                <span class="test-name">表情切换</span>
+                <span class="test-status pending" id="test-expression">待测试</span>
+            </div>
+            
+            <div class="test-item">
+                <span class="test-name">点击交互</span>
+                <span class="test-status pending" id="test-interaction">待测试</span>
+            </div>
+            
+            <div class="test-item">
+                <span class="test-name">响应式布局</span>
+                <span class="test-status pending" id="test-responsive">待测试</span>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-primary" onclick="runAllTests()">开始测试</button>
+            <button class="btn-secondary" onclick="openMainApp()">打开主应用</button>
+        </div>
+        
+        <div class="console-output">
+            <h3>📋 测试日志</h3>
+            <div id="console-logs"></div>
+        </div>
+    </div>
+    
+    <script>
+        const testResults = {};
+        let testCount = 0;
+        let passedTests = 0;
+        let failedTests = 0;
+        
+        function log(message, type = 'info') {
+            const consoleEl = document.getElementById('console-logs');
+            const time = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            let className = 'log-message';
+            if (type === 'success') className = 'log-success';
+            if (type === 'error') className = 'log-error';
+            
+            logEntry.innerHTML = `
+                <span class="log-time">[${time}]</span>
+                <span class="${className}">${message}</span>
+            `;
+            
+            consoleEl.insertBefore(logEntry, consoleEl.firstChild);
+        }
+        
+        function updateTestStatus(testId, status, progress = 100) {
+            const statusEl = document.getElementById(`test-${testId}`);
+            const progressEl = document.getElementById(`progress-${testId}`);
+            
+            if (statusEl) {
+                statusEl.className = `test-status ${status}`;
+                statusEl.textContent = status === 'pass' ? '✓ 通过' : 
+                                    status === 'fail' ? '✗ 失败' : '⏳ 运行中';
+            }
+            
+            if (progressEl) {
+                progressEl.style.width = `${progress}%`;
+            }
+        }
+        
+        async function testModelFiles() {
+            log('开始测试模型文件...');
+            
+            // 测试 .moc3 文件
+            try {
+                const moc3Response = await fetch('/models/Haru/Haru.moc3');
+                if (moc3Response.ok) {
+                    const size = moc3Response.headers.get('content-length');
+                    log(`✓ Haru.moc3 文件存在 (${formatBytes(size)})`, 'success');
+                    updateTestStatus('moc3', 'pass', 100);
+                    testResults.moc3 = true;
+                    passedTests++;
+                } else {
+                    log(`✗ Haru.moc3 文件访问失败: ${moc3Response.status}`, 'error');
+                    updateTestStatus('moc3', 'fail', 100);
+                    testResults.moc3 = false;
+                    failedTests++;
+                }
+            } catch (error) {
+                log(`✗ Haru.moc3 文件测试失败: ${error.message}`, 'error');
+                updateTestStatus('moc3', 'fail', 100);
+                testResults.moc3 = false;
+                failedTests++;
+            }
+            
+            // 测试纹理文件
+            setTimeout(async () => {
+                updateTestStatus('textures', 'running', 50);
+                try {
+                    const texResponse = await fetch('/models/Haru/Haru.2048/texture_00.png');
+                    if (texResponse.ok) {
+                        const size = texResponse.headers.get('content-length');
+                        log(`✓ 纹理文件存在 (${formatBytes(size)})`, 'success');
+                        updateTestStatus('textures', 'pass', 100);
+                        testResults.textures = true;
+                        passedTests++;
+                    } else {
+                        log(`✗ 纹理文件访问失败`, 'error');
+                        updateTestStatus('textures', 'fail', 100);
+                        testResults.textures = false;
+                        failedTests++;
+                    }
+                } catch (error) {
+                    log(`✗ 纹理文件测试失败: ${error.message}`, 'error');
+                    updateTestStatus('textures', 'fail', 100);
+                    testResults.textures = false;
+                    failedTests++;
+                }
+            }, 500);
+            
+            // 测试动作文件
+            setTimeout(async () => {
+                updateTestStatus('motions', 'running', 50);
+                try {
+                    const motionResponse = await fetch('/models/Haru/Haru.model3.json');
+                    if (motionResponse.ok) {
+                        const data = await motionResponse.json();
+                        const motionCount = data.FileReferences?.Motions ? 
+                            Object.keys(data.FileReferences.Motions).length : 0;
+                        if (motionCount > 0) {
+                            log(`✓ 动作配置正常 (${motionCount} 个动作组)`, 'success');
+                            updateTestStatus('motions', 'pass', 100);
+                            testResults.motions = true;
+                            passedTests++;
+                        } else {
+                            log(`✗ 动作配置缺失`, 'error');
+                            updateTestStatus('motions', 'fail', 100);
+                            testResults.motions = false;
+                            failedTests++;
+                        }
+                    } else {
+                        log(`✗ 动作配置文件访问失败`, 'error');
+                        updateTestStatus('motions', 'fail', 100);
+                        testResults.motions = false;
+                        failedTests++;
+                    }
+                } catch (error) {
+                    log(`✗ 动作文件测试失败: ${error.message}`, 'error');
+                    updateTestStatus('motions', 'fail', 100);
+                    testResults.motions = false;
+                    failedTests++;
+                }
+            }, 1000);
+            
+            // 测试表情文件
+            setTimeout(async () => {
+                updateTestStatus('expressions', 'running', 50);
+                try {
+                    const expResponse = await fetch('/models/Haru/Haru.model3.json');
+                    if (expResponse.ok) {
+                        const data = await expResponse.json();
+                        const expCount = data.FileReferences?.Expressions?.length || 0;
+                        if (expCount > 0) {
+                            log(`✓ 表情配置正常 (${expCount} 个表情)`, 'success');
+                            updateTestStatus('expressions', 'pass', 100);
+                            testResults.expressions = true;
+                            passedTests++;
+                        } else {
+                            log(`✗ 表情配置缺失`, 'error');
+                            updateTestStatus('expressions', 'fail', 100);
+                            testResults.expressions = false;
+                            failedTests++;
+                        }
+                    } else {
+                        log(`✗ 表情配置文件访问失败`, 'error');
+                        updateTestStatus('expressions', 'fail', 100);
+                        testResults.expressions = false;
+                        failedTests++;
+                    }
+                } catch (error) {
+                    log(`✗ 表情文件测试失败: ${error.message}`, 'error');
+                    updateTestStatus('expressions', 'fail', 100);
+                    testResults.expressions = false;
+                    failedTests++;
+                }
+            }, 1500);
+        }
+        
+        function testRenderingEngine() {
+            log('测试渲染引擎...');
+            
+            // 测试 WebGL 支持
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl');
+                if (gl) {
+                    log('✓ WebGL 支持', 'success');
+                    updateTestStatus('webgl', 'pass', 100);
+                    testResults.webgl = true;
+                    passedTests++;
+                } else {
+                    log('✗ WebGL 不支持', 'error');
+                    updateTestStatus('webgl', 'fail', 100);
+                    testResults.webgl = false;
+                    failedTests++;
+                }
+            } catch (error) {
+                log(`✗ WebGL 测试失败: ${error.message}`, 'error');
+                updateTestStatus('webgl', 'fail', 100);
+                testResults.webgl = false;
+                failedTests++;
+            }
+            
+            // 测试 PIXI.js 加载（通过主应用测试）
+            setTimeout(() => {
+                updateTestStatus('pixi', 'running', 50);
+                // 检查是否在主应用中加载了 PIXI
+                if (typeof PIXI !== 'undefined') {
+                    log('✓ PIXI.js 已加载', 'success');
+                    updateTestStatus('pixi', 'pass', 100);
+                    testResults.pixi = true;
+                    passedTests++;
+                } else {
+                    log('⚠ PIXI.js 未加载 (在主应用中测试)', 'info');
+                    updateTestStatus('pixi', 'pending', 100);
+                }
+            }, 500);
+            
+            // 测试 Live2D 加载器
+            setTimeout(() => {
+                updateTestStatus('live2d', 'running', 50);
+                // 检查是否在主应用中加载了 Live2D
+                if (typeof Live2DModel !== 'undefined') {
+                    log('✓ Live2D 模块已加载', 'success');
+                    updateTestStatus('live2d', 'pass', 100);
+                    testResults.live2d = true;
+                    passedTests++;
+                } else {
+                    log('⚠ Live2D 模块未加载 (在主应用中测试)', 'info');
+                    updateTestStatus('live2d', 'pending', 100);
+                }
+            }, 1000);
+        }
+        
+        function testFeatures() {
+            log('测试功能特性...');
+            
+            // 这些测试需要在主应用中进行
+            updateTestStatus('motion', 'pending', 0);
+            updateTestStatus('expression', 'pending', 0);
+            updateTestStatus('interaction', 'pending', 0);
+            updateTestStatus('responsive', 'pending', 0);
+            
+            log('⚠ 功能特性测试需要在主应用中进行', 'info');
+        }
+        
+        async function runAllTests() {
+            testCount = 0;
+            passedTests = 0;
+            failedTests = 0;
+            
+            // 重置所有状态
+            const allTests = ['moc3', 'textures', 'motions', 'expressions', 
+                            'pixi', 'live2d', 'webgl', 'motion', 'expression', 
+                            'interaction', 'responsive'];
+            allTests.forEach(test => {
+                updateTestStatus(test, 'pending', 0);
+            });
+            
+            log('🚀 开始完整测试套件...');
+            
+            await testModelFiles();
+            await testRenderingEngine();
+            await testFeatures();
+            
+            setTimeout(() => {
+                const total = passedTests + failedTests;
+                const passRate = total > 0 ? ((passedTests / total) * 100).toFixed(1) : 0;
+                
+                log(`📊 测试完成: ${passedTests}/${total} 通过 (${passRate}%)`, 
+                      passRate >= 80 ? 'success' : 'warning');
+                log(`🎯 通过率: ${passRate}%`, passRate >= 80 ? 'success' : 'warning');
+                
+                if (passRate >= 80) {
+                    log('✨ 测试结果良好！', 'success');
+                } else if (passRate >= 50) {
+                    log('⚠️ 测试结果一般', 'warning');
+                } else {
+                    log('✗ 测试结果较差', 'error');
+                }
+            }, 3000);
+        }
+        
+        function openMainApp() {
+            window.open('/', '_blank');
+        }
+        
+        function formatBytes(bytes) {
+            if (!bytes) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 页面加载时自动运行一些基础测试
+        window.addEventListener('DOMContentLoaded', () => {
+            log('📋 Live2D 功能测试工具已加载', 'success');
+            log('💡 提示: 点击 "开始测试" 运行完整测试', 'info');
+        });
+    </script>
+</body>
+</html>

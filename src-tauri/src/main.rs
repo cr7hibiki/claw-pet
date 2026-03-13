@@ -1,8 +1,10 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
-mod lib;
+#![cfg_attr(not(target_os = "windows"), windows_subsystem = "windows")]
 
 fn main() {
-    lib::run()
+    let mut builder = tauri_plugin_websocket::Builder::new();
+    let plugin = tauri_plugin_websocket::Builder::new().build();
+    builder = builder.plugin(plugin);
+    let context = tauri::generate_context!();
+    builder.setup(context);
+    builder.run(context);
 }

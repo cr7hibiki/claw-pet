@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claw-Pet 桌面应用</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+        }
+        
+        .app-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .pet-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .pet-display:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        
+        .pet-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .pet-icon {
+            font-size: 120px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .pet-label {
+            font-size: 28px;
+            color: white;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .status-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .status-item {
+            color: white;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .status-dot.live2d {
+            background: #4caf50;
+        }
+        
+        .status-dot.websocket {
+            background: #ff9800;
+        }
+        
+        .status-dot.desktop {
+            background: #2196f3;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            max-width: 350px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .info-panel.show {
+            display: block;
+        }
+        
+        .info-panel h3 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 12px;
+        }
+        
+        .info-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .info-content p {
+            margin: 8px 0;
+        }
+        
+        .close-button {
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.2s ease;
+        }
+        
+        .close-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="pet-display" id="petDisplay" onclick="toggleInfoPanel()">
+            <div class="pet-placeholder">
+                <div class="pet-icon">🦞</div>
+                <div class="pet-label">Claw-Pet</div>
+                <div style="font-size: 14px; color: rgba(255,255,255,0.8);">点击查看状态</div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-dot live2d"></div>
+                <span>Live2D 模型</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot websocket"></div>
+                <span>OpenClaw 连接</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot desktop"></div>
+                <span>桌面模式</span>
+            </div>
+        </div>
+        
+        <div class="info-panel" id="infoPanel">
+            <h3>🦞 Claw-Pet 状态</h3>
+            <div class="info-content">
+                <p><strong>当前状态:</strong></p>
+                <p>• 独立桌面应用模式</p>
+                <p>• Live2D 模型文件已就绪</p>
+                <p>• 开发服务器: http://localhost:1428/</p>
+                <p>• 准备集成 OpenClaw WebSocket</p>
+                <p>• 支持表情切换和动作播放</p>
+            </div>
+            <button class="close-button" onclick="event.stopPropagation()">关闭</button>
+        </div>
+    </div>
+    
+    <script>
+        function toggleInfoPanel() {
+            const panel = document.getElementById('infoPanel');
+            panel.classList.toggle('show');
+        }
+        
+        // 检查 Live2D 模型状态
+        fetch('/models/Haru/Haru.moc3')
+            .then(response => {
+                const live2dDot = document.querySelector('.status-dot.live2d');
+                if (response.ok) {
+                    live2dDot.style.background = '#4caf50';
+                } else {
+                    live2dDot.style.background = '#ff5722';
+                }
+            });
+        
+        // 自动显示欢迎信息
+        setTimeout(() => {
+            const panel = document.getElementById('infoPanel');
+            panel.classList.add('show');
+            setTimeout(() => {
+                panel.classList.remove('show');
+            }, 5000);
+        }, 2000);
+    </script>
+</body>
+</html>

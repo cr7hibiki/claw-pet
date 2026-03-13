@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live2D Haru 模型测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: white;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 600px;
+        }
+        
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #4caf50;
+        }
+        
+        .status.success {
+            border-left-color: #4caf50;
+        }
+        
+        .status.error {
+            border-left-color: #f44336;
+        }
+        
+        .status.loading {
+            border-left-color: #ff9800;
+        }
+        
+        .info {
+            margin-top: 30px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .info ul {
+            text-align: left;
+            margin-top: 15px;
+            padding-left: 20px;
+        }
+        
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .button-primary {
+            background: #FF4500;
+            color: white;
+        }
+        
+        .button-primary:hover {
+            background: #e03d00;
+            transform: translateY(-2px);
+        }
+        
+        .button-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .button-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="margin-bottom: 20px;">🦞 Live2D Haru 模型测试</h1>
+        
+        <div id="status" class="status loading">
+            <strong>状态:</strong> <span id="status-text">正在检查模型文件...</span>
+        </div>
+        
+        <div class="info">
+            <p><strong>Live2D 模型状态:</strong></p>
+            <ul>
+                <li id="moc3-status">正在检查 .moc3 文件...</li>
+                <li id="texture-status">正在检查纹理文件...</li>
+                <li id="motion-status">正在检查动作文件...</li>
+                <li id="expression-status">正在检查表情文件...</li>
+                <li id="config-status">正在检查配置文件...</li>
+            </ul>
+        </div>
+        
+        <div class="button-group">
+            <button class="button button-secondary" onclick="checkFiles()">检查文件</button>
+            <button class="button button-primary" onclick="window.location.href='/'">返回应用</button>
+        </div>
+    </div>
+    
+    <script>
+        function checkFiles() {
+            const statusEl = document.getElementById('status');
+            const statusText = document.getElementById('status-text');
+            
+            let hasIssues = false;
+            
+            // 检查 .moc3 文件
+            fetch('/models/Haru/Haru.moc3')
+                .then(response => {
+                    const moc3Status = document.getElementById('moc3-status');
+                    if (response.ok) {
+                        moc3Status.innerHTML = '✓ <strong>Haru.moc3</strong> 文件存在 (' + formatBytes(response.headers.get('content-length')) + ')';
+                        moc3Status.style.color = '#81c784';
+                    } else {
+                        moc3Status.innerHTML = '✗ <strong>Haru.moc3</strong> 文件不存在';
+                        moc3Status.style.color = '#f44336';
+                        hasIssues = true;
+                    }
+                })
+                .catch(error => {
+                    const moc3Status = document.getElementById('moc3-status');
+                    moc3Status.innerHTML = '⚠ <strong>Haru.moc3</strong> 文件检查失败';
+                    moc3Status.style.color = '#ff9800';
+                    hasIssues = true;
+                });
+            
+            // 检查纹理文件
+            fetch('/models/Haru/Haru.2048/texture_00.png')
+                .then(response => {
+                    const textureStatus = document.getElementById('texture-status');
+                    if (response.ok) {
+                        textureStatus.innerHTML = '✓ <strong>texture_00.png</strong> 文件存在 (' + formatBytes(response.headers.get('content-length')) + ')';
+                        textureStatus.style.color = '#81c784';
+                    } else {
+                        textureStatus.innerHTML = '✗ <strong>texture_00.png</strong> 文件不存在';
+                        textureStatus.style.color = '#f44336';
+                        hasIssues = true;
+                    }
+                });
+            
+            // 检查 model3.json
+            fetch('/models/Haru/Haru.model3.json')
+                .then(response => response.json())
+                .then(data => {
+                    const configStatus = document.getElementById('config-status');
+                    if (data.FileReferences && data.FileReferences.Moc) {
+                        configStatus.innerHTML = '✓ <strong>Haru.model3.json</strong> 配置文件正常';
+                        configStatus.style.color = '#81c784';
+                        
+                        // 检查动作
+                        const motionStatus = document.getElementById('motion-status');
+                        const motions = data.FileReferences.Motions;
+                        if (motions && (motions.Idle || motions.TapBody)) {
+                            const motionCount = ((motions.Idle?.length || 0) + (motions.TapBody?.length || 0));
+                            motionStatus.innerHTML = '✓ <strong>' + motionCount + '</strong> 个动作文件配置';
+                            motionStatus.style.color = '#81c784';
+                        } else {
+                            motionStatus.innerHTML = '⚠ 动作配置不完整';
+                            motionStatus.style.color = '#ff9800';
+                        }
+                        
+                        // 检查表情
+                        const expressionStatus = document.getElementById('expression-status');
+                        const expressions = data.FileReferences.Expressions;
+                        if (expressions && expressions.length > 0) {
+                            expressionStatus.innerHTML = '✓ <strong>' + expressions.length + '</strong> 个表情文件配置';
+                            expressionStatus.style.color = '#81c784';
+                        } else {
+                            expressionStatus.innerHTML = '⚠ 表情配置不完整';
+                            expressionStatus.style.color = '#ff9800';
+                        }
+                    } else {
+                        configStatus.innerHTML = '✗ <strong>Haru.model3.json</strong> 配置文件损坏';
+                        configStatus.style.color = '#f44336';
+                        hasIssues = true;
+                    }
+                })
+                .catch(() => {
+                    const configStatus = document.getElementById('config-status');
+                    configStatus.innerHTML = '✗ <strong>Haru.model3.json</strong> 配置文件读取失败';
+                    configStatus.style.color = '#f44336';
+                    hasIssues = true;
+                });
+            
+            // 更新总体状态
+            setTimeout(() => {
+                if (hasIssues) {
+                    statusEl.className = 'status error';
+                    statusText.textContent = '发现文件问题，请检查模型文件';
+                } else {
+                    statusEl.className = 'status success';
+                    statusText.textContent = 'Live2D 模型文件完整 ✓';
+                }
+            }, 2000);
+        }
+        
+        function formatBytes(bytes) {
+            if (!bytes) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 自动检查
+        setTimeout(checkFiles, 500);
+    </script>
+</body>
+</html>

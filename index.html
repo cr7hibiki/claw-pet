@@ -1,109 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Claw-Pet</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-        }
-        
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 60px;
-            border-radius: 30px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .app-icon {
-            font-size: 120px;
-            margin-bottom: 20px;
-            animation: float 3s ease-in-out infinite;
-        }
-        
-        .app-title {
-            font-size: 36px;
-            color: white;
-            margin: 0 0 10px 0;
-            font-weight: 700;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-        
-        .app-subtitle {
-            font-size: 18px;
-            color: rgba(255, 255, 255, 0.9);
-            margin: 0 0 20px 0;
-            font-weight: 500;
-        }
-        
-        .status-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            background: rgba(129, 199, 132, 0.3);
-            color: #81c784;
-            font-weight: 700;
-            font-size: 14px;
-            border: 1px solid rgba(129, 199, 132, 0.5);
-        }
-        
-        .instructions {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .instructions p {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 14px;
-            line-height: 1.6;
-            margin: 5px 0;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-    </style>
-</head>
-<body>
-    <div class="app-container">
-        <div class="app-icon">🦞</div>
-        <h1 class="app-title">Claw-Pet</h1>
-        <p class="app-subtitle">Live2D 桌面宠物应用</p>
-        <div class="status-badge">✓ 应用正常运行</div>
-        
-        <div class="instructions">
-            <p><strong>当前状态:</strong></p>
-            <p>• 开发服务器运行正常</p>
-            <p>• 静态页面渲染成功</p>
-            <p>• 使用纯HTML/CSS版本</p>
-            <p>• 准备集成Live2D模型</p>
-        </div>
-    </div>
-</body>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

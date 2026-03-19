@@ -7,11 +7,13 @@ interface PetDisplayProps {
   modelName?: string;
 }
 
+type ModelStatus = 'loading' | 'loaded' | 'fallback';
+
 export function PetDisplay({ modelPath = '/models/Haru', modelName = 'Haru' }: PetDisplayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const loaderRef = useRef<HaruLive2DLoader | null>(null);
   const [showInfo, setShowInfo] = useState(false);
-  const [modelLoaded, setModelLoaded] = useState(false);
+  const [modelStatus, setModelStatus] = useState<ModelStatus>('loading');
   const [currentExpression, setCurrentExpression] = useState('正常');
 
   useEffect(() => {
@@ -20,17 +22,17 @@ export function PetDisplay({ modelPath = '/models/Haru', modelName = 'Haru' }: P
 
     const loader = new HaruLive2DLoader(canvas);
     loaderRef.current = loader;
+    setModelStatus('loading');
 
     loader.loadModel(modelPath, modelName)
       .then((loaded) => {
-        setModelLoaded(loaded);
-        if (loaded) {
-          loader.startAnimationLoop();
-        }
+        setModelStatus(loaded ? 'loaded' : 'fallback');
+        loader.startAnimationLoop();
       })
       .catch((error) => {
         console.error('Failed to load Live2D model:', error);
-        setModelLoaded(false);
+        setModelStatus('fallback');
+        loader.startAnimationLoop();
       });
 
     const handleResize = () => {
@@ -66,20 +68,32 @@ export function PetDisplay({ modelPath = '/models/Haru', modelName = 'Haru' }: P
         {showInfo ? '隐藏状态' : '查看状态'}
       </button>
 
-      <canvas 
+      <canvas
         ref={canvasRef}
         id="live2d-canvas"
         className="live2d-canvas"
         onClick={handleClick}
       />
-      
+
       {showInfo && (
         <div className="info-panel">
           <h3>🦞 Claw-Pet 状态</h3>
           <div className="status-item">
             <span className="status-label">Live2D 模型:</span>
-            <span className={`status-value ${modelLoaded ? 'success' : 'warning'}`}>
-              {modelLoaded ? '✓ Haru 已加载' : '⚠ 加载中'}
+            <span
+              className={`status-value ${
+                modelStatus === 'loaded'
+                  ? 'success'
+                  : modelStatus === 'fallback'
+                    ? 'warning'
+                    : 'info'
+              }`}
+            >
+              {modelStatus === 'loaded'
+                ? '✓ Haru 已加载'
+                : modelStatus === 'fallback'
+                  ? '⚠ 使用占位图'
+                  : '… 加载中'}
             </span>
           </div>
           <div className="status-item">

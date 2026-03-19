@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PetDisplay } from './components/PetDisplay';
 import { MessageBubble } from './components/MessageBubble';
 import { MessageDetailModal } from './components/MessageDetailModal';
@@ -16,24 +16,33 @@ function App() {
     disconnectFromGateway,
   } = useStore();
   const [detailOpen, setDetailOpen] = useState(false);
+  const isTauriRuntime = useMemo(
+    () => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window,
+    [],
+  );
 
   useEffect(() => {
+    if (!isTauriRuntime) {
+      return;
+    }
+
     void connectToGateway();
 
     return () => {
       void disconnectFromGateway();
     };
-  }, [connectToGateway, disconnectFromGateway]);
+  }, [connectToGateway, disconnectFromGateway, isTauriRuntime]);
 
   const latestMessage = messages[messages.length - 1];
   const bubbleContent = latestMessage?.content || currentMessage;
+  const statusText = isTauriRuntime ? connectionStatus : 'browser preview';
 
   return (
     <div className="app-container" data-tauri-drag-region>
       <div className="status-bar">
         <span className={`status-dot ${connected ? 'ok' : 'warn'}`} />
-        <span className="status-text">Gateway: {connectionStatus}</span>
-        {!connected ? (
+        <span className="status-text">Gateway: {statusText}</span>
+        {isTauriRuntime && !connected ? (
           <button className="reconnect-button" onClick={() => void connectToGateway()}>
             重连
           </button>

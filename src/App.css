@@ -5,20 +5,69 @@
 }
 
 .app-container {
+  position: relative;
   width: 100vw;
   height: 100vh;
-  background: transparent;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 20px;
+  overflow: hidden;
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 40%),
+    linear-gradient(140deg, #1e3a5f 0%, #275a7a 40%, #1a6c5f 100%);
 }
 
-.drag-region {
-  width: 100%;
-  height: 400px;
+.status-bar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 20;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(8, 24, 38, 0.55);
+  color: #eef6fb;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  backdrop-filter: blur(8px);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.status-dot.ok {
+  background: #67d46f;
+  box-shadow: 0 0 0 6px rgba(103, 212, 111, 0.18);
+}
+
+.status-dot.warn {
+  background: #ffb04d;
+  box-shadow: 0 0 0 6px rgba(255, 176, 77, 0.18);
+}
+
+.status-text {
+  text-transform: capitalize;
+}
+
+.reconnect-button {
+  margin-left: 2px;
+  border: none;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #eef6fb;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.reconnect-button:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.bubble-area {
+  position: absolute;
+  right: 16px;
+  bottom: 20px;
+  z-index: 20;
 }

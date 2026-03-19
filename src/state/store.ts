@@ -1,4 +1,7 @@
 import { create } from 'zustand';
+import { OpenClawClient } from '../lib/openclaw/client';
+import { GATEWAY_URL } from '../lib/openclaw/protocol';
+import type { WebSocketMessage } from '../lib/openclaw/types';
 
 export interface Message {
   id: string;
@@ -19,10 +22,51 @@ interface AppState {
   setCurrentMessage: (message: string) => void;
   addMessage: (message: Message) => void;
   connectToGateway: () => Promise<void>;
+  disconnectFromGateway: () => Promise<void>;
   sendMessage: (text: string) => Promise<void>;
 }
 
-export const useStore = create<AppState>((set) => ({
+const openClawClient = new OpenClawClient();
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+let manualDisconnect = false;
+
+function clearReconnectTimer(): void {
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+}
+
+function extractMessageContent(message: WebSocketMessage): string | null {
+  const payload = message.payload;
+
+  if (typeof payload === 'string') {
+    return payload;
+  }
+
+  if (payload && typeof payload === 'object' && 'content' in payload) {
+    const content = (payload as { content?: unknown }).content;
+    return typeof content === 'string' ? content : null;
+  }
+
+  if (message.params && typeof message.params === 'object' && 'content' in message.params) {
+    const content = (message.params as { content?: unknown }).content;
+    return typeof content === 'string' ? content : null;
+  }
+
+  return null;
+}
+
+function createLocalMessage(content: string): Message {
+  return {
+    id: Math.random().toString(36).slice(2),
+    content,
+    timestamp: Date.now(),
+    isLatest: true,
+  };
+}
+
+export const useStore = create<AppState>((set, get) => ({
   connected: false,
   connectionStatus: 'disconnected',
   currentMessage: '',
@@ -32,21 +76,83 @@ export const useStore = create<AppState>((set) => ({
   setConnectionStatus: (status) => set({ connectionStatus: status }),
   setCurrentMessage: (message) => set({ currentMessage: message }),
 
-  addMessage: (message) => set((state) => {
-    const messages = [
-      ...state.messages.filter(m => !m.isLatest).map(m => ({ ...m, isLatest: false })),
-      { ...message, isLatest: message.isLatest }
-    ];
-    return { messages: messages.slice(-100) };
-  }),
+  addMessage: (message) =>
+    set((state) => {
+      const messages = [
+        ...state.messages.map((m) => ({ ...m, isLatest: false })),
+        { ...message, isLatest: true },
+      ];
+
+      return { messages: messages.slice(-100) };
+    }),
 
   connectToGateway: async () => {
-    // 在阶段 2 实现
-    console.log('Connect to Gateway placeholder');
+    const { connected, connectionStatus } = get();
+    if (connected || connectionStatus === 'connecting') {
+      return;
+    }
+
+    manualDisconnect = false;
+    clearReconnectTimer();
+
+    set({ connectionStatus: 'connecting' });
+
+    try {
+      await openClawClient.connect(GATEWAY_URL, (message) => {
+        const content = extractMessageContent(message);
+        if (!content) {
+          return;
+        }
+
+        get().addMessage(createLocalMessage(content));
+        set({ currentMessage: content });
+      });
+
+      set({ connected: true, connectionStatus: 'connected' });
+    } catch (error) {
+      console.error('Connect to Gateway failed:', error);
+      set({ connected: false, connectionStatus: 'error' });
+
+      if (!manualDisconnect) {
+        reconnectTimer = setTimeout(() => {
+          reconnectTimer = null;
+          void get().connectToGateway();
+        }, 3000);
+      }
+    }
+  },
+
+  disconnectFromGateway: async () => {
+    manualDisconnect = true;
+    clearReconnectTimer();
+
+    try {
+      await openClawClient.disconnect();
+    } catch (error) {
+      console.error('Disconnect from Gateway failed:', error);
+    } finally {
+      set({ connected: false, connectionStatus: 'disconnected' });
+    }
   },
 
   sendMessage: async (text) => {
-    // 在阶段 2 实现
-    console.log('Send message placeholder:', text);
-  }
+    const content = text.trim();
+    if (!content) {
+      return;
+    }
+
+    get().addMessage(createLocalMessage(content));
+    set({ currentMessage: content });
+
+    if (!get().connected) {
+      return;
+    }
+
+    try {
+      await openClawClient.sendMessage(content);
+    } catch (error) {
+      console.error('Send message failed:', error);
+      set({ connectionStatus: 'error', connected: false });
+    }
+  },
 }));

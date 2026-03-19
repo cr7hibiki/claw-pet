@@ -1,34 +1,55 @@
+import { useEffect, useState } from 'react';
+import { PetDisplay } from './components/PetDisplay';
+import { MessageBubble } from './components/MessageBubble';
+import { MessageDetailModal } from './components/MessageDetailModal';
+import { ChatDialog } from './components/ChatDialog';
+import { useStore } from './state/store';
+import './App.css';
+
 function App() {
-  console.log('App rendered');
-  
+  const {
+    connected,
+    connectionStatus,
+    currentMessage,
+    messages,
+    connectToGateway,
+    disconnectFromGateway,
+  } = useStore();
+  const [detailOpen, setDetailOpen] = useState(false);
+
+  useEffect(() => {
+    void connectToGateway();
+
+    return () => {
+      void disconnectFromGateway();
+    };
+  }, [connectToGateway, disconnectFromGateway]);
+
+  const latestMessage = messages[messages.length - 1];
+  const bubbleContent = latestMessage?.content || currentMessage;
+
   return (
-    <div style={{
-      width: '100vw',
-      height: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      color: 'white',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      <div style={{
-        padding: '60px',
-        borderRadius: '30px',
-        background: 'rgba(255, 255, 255, 0.15)',
-        backdropFilter: 'blur(10px)',
-        border: '2px solid rgba(255, 255, 255, 0.3)',
-        textAlign: 'center'
-      }}>
-        <div style={{ fontSize: '120px', marginBottom: '20px' }}>🦞</div>
-        <h1 style={{ margin: '0 0 10px 0', fontSize: '32px' }}>Claw-Pet</h1>
-        <p style={{ margin: '0', fontSize: '18px', opacity: 0.9 }}>
-          Live2D 桌面宠物应用
-        </p>
-        <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7 }}>
-          状态: 应用正常运行 ✓
-        </p>
+    <div className="app-container" data-tauri-drag-region>
+      <div className="status-bar">
+        <span className={`status-dot ${connected ? 'ok' : 'warn'}`} />
+        <span className="status-text">Gateway: {connectionStatus}</span>
+        {!connected ? (
+          <button className="reconnect-button" onClick={() => void connectToGateway()}>
+            重连
+          </button>
+        ) : null}
       </div>
+
+      <PetDisplay />
+
+      {bubbleContent ? (
+        <div className="bubble-area">
+          <MessageBubble content={bubbleContent} isLatest onClick={() => setDetailOpen(true)} />
+        </div>
+      ) : null}
+
+      <ChatDialog />
+      <MessageDetailModal open={detailOpen} onClose={() => setDetailOpen(false)} />
     </div>
   );
 }

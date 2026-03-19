@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import HaruLive2DLoader from '../lib/live2d/HaruLoader';
 import './PetDisplay.css';
 
-export function PetDisplay() {
+interface PetDisplayProps {
+  modelPath?: string;
+  modelName?: string;
+}
+
+export function PetDisplay({ modelPath = '/models/Haru', modelName = 'Haru' }: PetDisplayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const loaderRef = useRef<HaruLive2DLoader | null>(null);
   const [showInfo, setShowInfo] = useState(false);
@@ -16,7 +21,7 @@ export function PetDisplay() {
     const loader = new HaruLive2DLoader(canvas);
     loaderRef.current = loader;
 
-    loader.loadModel('/models/Haru', 'Haru')
+    loader.loadModel(modelPath, modelName)
       .then((loaded) => {
         setModelLoaded(loaded);
         if (loaded) {
@@ -38,11 +43,11 @@ export function PetDisplay() {
       window.removeEventListener('resize', handleResize);
       loader.destroy();
     };
-  }, []);
+  }, [modelPath, modelName]);
 
   const handleClick = () => {
-    setShowInfo(!showInfo);
-    
+    window.dispatchEvent(new CustomEvent('open-chat-dialog'));
+
     if (loaderRef.current) {
       loaderRef.current.playMotion('TapBody', 0);
     }
@@ -57,6 +62,10 @@ export function PetDisplay() {
 
   return (
     <div className="pet-container">
+      <button className="info-toggle" onClick={() => setShowInfo((value) => !value)}>
+        {showInfo ? '隐藏状态' : '查看状态'}
+      </button>
+
       <canvas 
         ref={canvasRef}
         id="live2d-canvas"

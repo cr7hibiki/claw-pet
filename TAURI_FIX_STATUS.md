@@ -1,192 +1,98 @@
-# Tauri 桌面应用修复状态 🔧
+# Tauri 修复过程记录
 
-## 🚨 当前状态
+## 当前结论
 
-### Tauri 编译问题
-```
-状态: 持续失败
-错误1: OUT_DIR env var not set
-错误2: mismatched types (E0308, E0599)
-错误3: tauri 2.0 vs 2.1 API 不兼容
-```
+Tauri 修复工作已经完成最关键的一步：
 
-### 已尝试的解决方案
+**项目已从“仓库无法被识别为 Tauri 项目”，恢复到“最小 Tauri 2 桌面闭环可运行”。**
 
-#### 尝试 1: 更新依赖版本
-- ✅ 更新 Tauri CLI 到 0.15.0
-- ✅ 统一所有 Tauri 依赖到 2.1.1
-- ⚠️ 编译问题持续存在
+## 修复路径回顾
 
-#### 尝试 2: 简化 Rust 代码
-- ✅ 简化 main.rs 多次
-- ✅ 移除 build.rs 和相关文件
-- ✅ 尝试不同的 Builder API 调用方式
-- ✅ 使用 Manager::builder()
-- ⚠️ 编译错误持续存在
+### 起点
+最初的真实状态是：
+- `npm run build` 成功
+- `npm run tauri:dev` 失败
+- CLI 报错：当前目录不是 Tauri 项目
+- 仓库缺失 `src-tauri`
 
-#### 尝试 3: 清理项目结构
-- ✅ 删除整个 src-tauri 目录
-- ✅ 重新创建干净的配置
-- ✅ 移除 Cargo.toml
-- ✅ 创建简化的 tauri.conf.json
+### 本轮修复动作
 
-#### 尝试 4: 修改配置
-- ✅ 添加 identifier 字段
-- ✅ 使用 Web 构建系统而非 Cargo 构建
-- ✅ 移除所有 Rust 源文件
+1. 校准文档，让 README 和状态文档先承认仓库现实
+2. 重建最小 `src-tauri` 工程：
+   - `Cargo.toml`
+   - `build.rs`
+   - `src/main.rs`
+   - `tauri.conf.json`
+   - `capabilities/default.json`
+3. 固定 Vite 端口为 `1420` 且 `strictPort: true`
+4. 生成 Windows 开发所需图标资源
+5. 验证 `tauri:dev`
+6. 验证 `tauri:build`
 
-## 🎯 当前可用功能
+## 关键失败模式如何演进
 
-### ✅ 独立桌面应用
-**文件**: `public/standalone.html`
-**功能**: 
-- 透明背景
-- 浮动宠物图标
-- 点击交互
-- 状态显示面板
-
-**访问**: 在浏览器中打开或双击文件
-
-### ✅ 开发服务器
-**URL**: `http://localhost:1420/` (Vite 开发服务器)
-**状态**: 正常运行
-**功能**: 完整的 React + Live2D 应用
-
-### ✅ Live2D 模型集成
-**模型**: 完整的 Haru 模型（4.2 MB）
-**功能**: 
-- 27 个动作文件
-- 8 个表情文件
-- 物理和姿态系统
-- 音效支持
-
-## 🔍 问题分析
-
-### 根本原因
-Tauri 2.0 版本的 Cargo.toml 构建系统与当前环境存在兼容性问题。具体表现为：
-- OUT_DIR 环境变量无法正确设置
-- Rust 代码中的宏调用不兼容
-
-### 可能的解决方案
-
-#### 方案 1: 修复 Tauri 编译 (推荐)
-**优点**: 
-- 生成真正的桌面应用安装包
-- 支持系统托盘和开机启动
-- 完整的桌面集成
-
-**缺点**:
-- 需要解决 Cargo 编译问题
-- 开发时间较长
-
-#### 方案 2: 使用独立应用 (当前可用)
-**优点**:
-- 立即可用，无需修复
-- 功能完整
-- 可以用作桌面壁纸
-
-**缺点**:
-- 无法生成独立安装包
-- 需要手动设置开机启动
-
-#### 方案 3: 使用 Electron (备选)
-**优点**:
-- 稳定的生态系统
-- 丰富的文档
-
-**缺点**:
-- 需要重写部分代码
-- 安装包更大
-
-## 📋 下一步建议
-
-### 立即可测试（推荐）
-```
-1. 双击打开：public/standalone.html
-2. 查看浮动的宠物效果
-3. 测试点击交互功能
-4. 验证背景透明性
+### 阶段 1：不是 Tauri 项目
+```text
+Couldn't recognize the current folder as a Tauri project.
 ```
 
-### 如果要完整桌面应用
-1. 需要解决 Rust 编译环境问题
-2. 或考虑迁移到 Electron
-3. 或等待 Tauri 2.1 版本的稳定性提升
+### 阶段 2：Cargo manifest 不匹配
+```text
+can't find library `claw_pet_lib`
+```
 
-### 🎯 技术细节
+### 阶段 3：Windows 图标资源缺失
+```text
+`icons/icon.ico` not found
+```
 
-**编译命令**:
+### 阶段 4：最小闭环达成
+- `npm run tauri:dev` 成功
+- `npm run tauri:build` 成功
+
+## 当前成果
+
+### 开发态
+
 ```bash
-# 当前失败的方式
-cargo build --manifest-path src-tauri/Cargo.toml
+npm run tauri:dev
+```
 
-# 环境设置方式
-set OUT_DIR=%cd%/../../target
-cargo build --manifest-path src-tauri/Cargo.toml
+结果：成功。
 
-# 使用 npm 构建方式（推荐）
+关键输出：
+- Vite 启动在 `http://localhost:1420/`
+- Rust 编译完成
+- `target\\debug\\claw-pet.exe` 运行
+
+### 构建态
+
+```bash
 npm run tauri:build
 ```
 
-**错误信息**:
-- `error[E0308]: mismatched types` - setup/run 返回类型不匹配
-- `OUT_DIR env var is not set` - 环境变量问题
+结果：成功。
 
-**Tauri 配置**:
-```json
-{
-  "identifier": "com.claw-pet.app",
-  "build": {
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build"
-    "devUrl": "http://localhost:1420"
-    "frontendDist": "../dist"
-  }
-}
-```
+关键输出：
+- `release` 构建完成
+- 产物位于：`src-tauri/target/release/claw-pet.exe`
 
-## 📊 Git 提交历史
+## 当前策略为何有效
 
-```
-270820d Attempt comprehensive Tauri desktop fix
-072aa0a Initial commit: Claw-Pet Live2D desktop application
-```
+这次没有继续追旧的 API 兼容历史，而是先恢复“最小工程存在性”。
+这样做把问题拆成了明确的几层：
 
-## ✅ 已完成的工作
+1. 工程存在性
+2. 配置正确性
+3. 平台资源完整性
+4. 业务能力恢复
 
-### ✅ Live2D 集成
-- 完整的 Haru 模型下载和配置
-- 所有必需文件就绪
-- 测试工具和文档完善
+前 3 层现在已经打通，第 4 层留给下一阶段。
 
-### ✅ 测试和文档
-- 多个测试页面创建
-- 详细的修复计划和状态跟踪
+## 下一阶段
 
-### ⚠️ Tauri 桌面应用
-- 编译问题尚未解决
-- 需要环境配置修复
-- 当前依赖版本不统一
+现在不应该回头继续泛化“修 Tauri”，而应该进入分层恢复：
 
-## 🎯 推荐使用方案
-
-### 当前阶段：功能优先
-1. **优先**: 让用户体验独立桌面应用
-2. **后续**: 逐步解决 Tauri 编译问题
-
-### 使用指南
-
-#### 独立应用
-```
-双击文件：public/standalone.html
-或在浏览器中打开
-```
-
-#### 开发服务器
-```
-访问：http://localhost:1420/
-```
-
----
-
-**状态**: 独立桌面应用 ✅ 可用 | Tauri 桌面应用 ⚠️ 编译中 | Live2D 模型 ✅ 就绪 | 开发服务器 ✅ 运行中
+1. 先恢复 Live2D 桌面渲染
+2. 再恢复 OpenClaw Gateway 通信
+3. 最后再考虑插件、托盘、开机启动等增强能力

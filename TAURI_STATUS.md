@@ -1,235 +1,96 @@
-# Tauri 桌面应用修复状态 🔧
+# Tauri 当前状态
 
-## 📊 当前状态
+## 结论
 
-### ✅ 已完成的功能
-- **Live2D 模型集成** - 完整的 Haru 模型（4.2 MB）
-- **表情和动作系统** - 8 个表情、27 个动作
-- **React 应用框架** - 完整的组件系统
-- **开发服务器** - Vite 热重载正常运行
-- **测试工具** - 多个测试页面和验证工具
-- **独立版本** - 透明背景的桌面应用
+当前仓库已经恢复出 **最小可运行的 Tauri 2 项目**。
 
-### 🚨 Tauri 桌面应用问题
+已验证事实：
+- `npm run build` 成功
+- `npm run tauri:dev` 成功
+- `npm run tauri:build` 成功
+- `src-tauri` 已重新存在并能参与 dev/build 流程
 
-#### 编译错误
-```
-error[E0425]: cannot find function `setup` in crate `tauri`
-error[E0599]: no method named `run` found for struct `TauriPlugin<R, C>`
-error[E0599]: no method named `plugin` found for struct `tauri_plugin_websocket::Builder`
-```
+## 已达成的最小闭环
 
-#### 根本原因
-- **API 不兼容** - Tauri 2.0 vs 2.1 API 差异
-- **版本混乱** - package.json 指定 2.1，但实际使用 2.0 语法
+当前最小成功标准已经满足：
 
-## 🎯 可用版本
+1. 仓库重新拥有最小 `src-tauri` 工程
+2. `npm run tauri:dev` 能打开桌面程序
+3. `npm run tauri:build` 能完成桌面构建
+4. React 前端已经被正确接入 Tauri 壳层
 
-### 1. 独立桌面应用 ⭐⭐
-**文件**: `public/standalone.html`
+## 当前仓库里有什么
 
-**特点**:
-- ✅ 浮动的宠物图标 🦞
-- ✅ 完全透明背景
-- ✅ 可用作桌面壁纸
-- ✅ 点击交互功能
-- ✅ 状态信息显示
-- ✅ 平滑动画效果
+### 已存在
+- React 前端工程
+- Live2D 相关代码与模型资源
+- OpenClaw 客户端与状态管理代码
+- `public/standalone.html` 临时展示页
+- `src-tauri` 最小 Tauri 2 工程
+- `tauri:dev` / `tauri:build` npm 脚本
 
-**使用方式**:
+### 已恢复的关键项
+- `src-tauri/Cargo.toml`
+- `src-tauri/build.rs`
+- `src-tauri/src/main.rs`
+- `src-tauri/tauri.conf.json`
+- `src-tauri/capabilities/default.json`
+- `src-tauri/icons/*`
+
+## 当前不做的事
+
+为了避免问题重新混在一起，这一轮仍然 **不包含**：
+
+- websocket/dialog 插件恢复
+- 系统托盘、开机启动
+- Live2D 桌面端联调
+- OpenClaw Gateway 桌面端联调
+- 高级窗口特性和视觉打磨
+
+## 推荐恢复顺序
+
+1. 保持最小桌面壳稳定
+2. 恢复 Live2D 桌面渲染
+3. 恢复 OpenClaw Gateway 桌面通信
+4. 最后引入 Tauri 插件与高级桌面功能
+
+## 当前入口说明
+
+### 浏览器开发
+
 ```bash
-# 方式 1: 直接打开
-open public/standalone.html
-
-# 方式 2: 双击文件
-# 在文件管理器中双击 standalone.html
+npm run dev
 ```
 
-**效果**: 在桌面上显示浮动的宠物，背景完全透明
+Vite 端口：`1420`
 
----
+### 前端构建
 
-### 2. 开发服务器版本 ⭐⭐
-**URL**: `http://localhost:1430/`
-
-**特点**:
-- ✅ 完整的 Live2D 模型
-- ✅ 27 个动作动画
-- ✅ 8 种表情切换
-- ✅ 热重载支持
-- ✅ React 完整功能
-- ✅ 实时调试能力
-
-**访问方式**:
-```
-http://localhost:1430/
+```bash
+npm run build
 ```
 
-**优点**:
-- 完整的功能测试
-- 热更新更快
-- 开发工具集成
-- 错误调试更方便
+### Tauri 桌面开发
 
----
+```bash
+npm run tauri:dev
+```
 
-## 🔧 Tauri 桌面应用修复计划
+当前状态：成功。
 
-### 方案 1: 使用 Tauri 2.0 正确 API
-**步骤**:
-1. 更新 package.json 到最新 Tauri 2.1
-2. 修复 main.rs 使用正确的 Builder API
-3. 重新编译 Rust 后端
-4. 生成真正的桌面应用
+关键结果：
+- Vite 成功启动在 `1420`
+- Rust/Tauri 成功编译
+- `target\\debug\\claw-pet.exe` 成功运行
 
-**预期时间**: 15-30 分钟
+### Tauri 桌面构建
 
-### 方案 2: 创建全新的 Tauri 项目
-**步骤**:
-1. 使用最新的 Tauri CLI 初始化新项目
-2. 复制现有的 Rust 代码和配置
-3. 使用正确的项目结构
-4. 重新编译和测试
+```bash
+npm run tauri:build
+```
 
-**预期时间**: 30-45 分钟
+当前状态：成功。
 
-### 方案 3: 使用 Electron（备选）
-**步骤**:
-1. 评估 Electron 作为替代方案
-2. 迁移 Tauri 功能到 Electron
-3. 重写桌面应用部分
-4. 保持前端代码不变
-
-**预期时间**: 2-3 小时
-
-## 📝 推荐的下一步行动
-
-### 立即可用（推荐）
-1. **使用独立应用**
-   - 打开 `public/standalone.html`
-   - 查看桌面宠物效果
-   - 测试基本交互功能
-
-2. **访问开发服务器**
-   - 打开 `http://localhost:1430/`
-   - 测试 Live2D 完整功能
-   - 验证表情和动作系统
-
-### 短期任务（修复 Tauri）
-1. **更新 Tauri CLI**
-   ```bash
-   npm install -D @tauri-apps/cli@latest
-   npm update @tauri-apps/cli
-   ```
-
-2. **修复 API 兼容性**
-   - 研究 Tauri 2.0 和 2.1 的 API 差异
-   - 使用正确的 Builder 模式
-   - 测试编译和运行
-
-3. **生成桌面应用**
-   ```bash
-   npm run tauri:build
-   ```
-
-### 长期任务（如果需要）
-1. **Electron 迁移**
-   - 评估 Electron 集成复杂度
-   - 考虑开发效率和维护成本
-   - 做技术选型决策
-
-2. **多平台支持**
-   - 添加 macOS 和 Linux 支持
-   - 统一桌面应用体验
-   - 打包和分发策略
-
-## 📊 技术对比
-
-| 特性 | 独立应用 | 开发服务器 | Tauri 桌面 | Electron |
-|------|-----------|-------------|-----------|----------|---------|
-| 桌面显示 | ✅ | ❌ | ❌ | ✅ | ✅ |
-| Live2D 功能 | ✅ | ✅ | ❌ | ✅ | ✅ |
-| 热重载 | ❌ | ✅ | ✅ | ✅ | ✅ |
-| 系统托盘 | ❌ | ❌ | ❌ | ❌ | ✅ |
-| 系统集成 | ❌ | ❌ | ❌ | ✅ | ✅ |
-| 安装包大小 | ~500KB | ~5MB | ~500MB | ~50-100MB |
-| 开发效率 | ⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ |
-
-## 🎯 建议顺序
-
-### 阶段 1: 立即验证（5 分钟）
-- 测试独立应用基本功能
-- 确认桌面显示效果
-- 验证 Live2D 模型加载
-
-### 阶段 2: 功能测试（15 分钟）
-- 测试开发服务器版本
-- 验证所有表情和动作
-- 检查性能和响应速度
-- 记录任何问题
-
-### 阶段 3: 决策（30 分钟）
-- 独立应用 vs Tauri 桌面
-- 开发服务器版本评估
-- Electron 可行性分析
-- 最佳方案选择
-
-### 阶段 4: 执行（根据决策）
-- 实施选定的修复方案
-- 测试和验证
-- 部署到生产环境
-
-## 🚀 成功标准
-
-### 短期成功（1-2 小时）
-- ✅ 至少一个版本在桌面上正常显示
-- ✅ 基本的 Live2D 功能可用
-- ✅ 无严重的编译或运行错误
-
-### 长期成功（1 周）
-- ✅ 完整的桌面应用功能
-- ✅ Tauri 桌面应用正常运行
-- ✅ 跨平台支持
-- ✅ 系统托盘和开机启动
-
-## 📝 技术资源
-
-### 文档链接
-- **Tauri 官方文档**: https://v2.tauri.app/
-- **Tauri API 参考**: https://v2.tauri.app/reference/
-- **迁移指南**: https://v2.tauri.app/migrate/
-
-### 项目文档
-- **README.md** - 项目概览和安装指南
-- **LIVE2D_STATUS.md** - Live2D 集成状态
-- **TEST_RESULTS.md** - 测试工具和结果
-- **LIVE2D_SETUP.md** - Live2D 设置指南
-
-## 🔗 Git 状态
-
-**最新提交**: `b1607f0` - Attempt Tauri desktop fix
-**分支**: master
-**远程**: github.com:cr7hibiki/claw-pet.git
-
-## 💡 用户选择
-
-### 选项 A: 使用独立应用（推荐）
-**优点**: 立即可用，功能完整
-**缺点**: 无法生成独立安装包
-**适合**: 桌面宠物体验，快速验证
-
-### 选项 B: 修复 Tauri 桌面应用
-**优点**: 完整桌面功能，可生成安装包
-**缺点**: 需要解决 API 兼容性，开发时间较长
-**适合**: 长期使用，需要原生功能
-
-### 选项 C: 迁移到 Electron
-**优点**: 稳定的生态系统，丰富的文档
-**缺点**: 需要重写桌面部分，安装包较大
-**适合**: 复杂桌面应用，跨平台需求
-
----
-
-**当前推荐**: 先试试独立应用体验桌面宠物功能！🦞✨
-
-**下一步**: 请告诉我你希望采取哪个选项，我会继续相应的实现工作。
+关键结果：
+- 完成 release 构建
+- 产物路径：`src-tauri/target/release/claw-pet.exe`

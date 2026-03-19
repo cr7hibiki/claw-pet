@@ -1,212 +1,136 @@
 # Claw-Pet 🦞
 
-一个支持 OpenClaw 的 Live2D 桌面宠物应用。
+一个基于 React、Live2D 和 OpenClaw 的桌宠项目。当前仓库已经恢复出 **最小可运行的 Tauri 2 桌面闭环**：可以启动桌面窗口，也可以完成桌面构建。
 
-## 项目结构
+## 当前事实
 
-```
+截至当前仓库状态：
+
+- 前端工程可构建：`npm run build` 成功
+- Vite 开发端口固定为 `1420`
+- `npm run tauri:dev` 已成功启动桌面程序
+- `npm run tauri:build` 已成功生成桌面产物
+- `src-tauri` 最小工程骨架已恢复
+- `public/standalone.html` 仍然保留，但它只是临时展示页，不是主入口
+
+## 当前项目结构
+
+```text
 claw-pet/
-├── src/                          # 前端源码
-│   ├── components/                # UI 组件
-│   │   ├── PetDisplay.tsx      # Live2D 宠物显示
-│   ├── MessageBubble.tsx     # 消息气泡
-│   ├── ChatDialog.tsx       # 输入对话框
-│   └── MessageDetailModal.tsx # 消息详情弹窗
-│   ├── lib/                     # 工具库
-│   │   ├── live2d/            # Live2D SDK 集成
-│   │   │   ├── Framework/     # 从 SDK 复制
-│   │   │   ├── Core/          # 从 SDK 复制
-│   │   │   ├── HaruLoader.ts  # Haru 模型加载器
-│   │   ├── openclaw/          # OpenClaw 客户端
-│   │   ├── protocol.ts      # 协议定义
-│   │   └── types.ts        # 类型定义
-│   ├── state/                   # 状态管理
-│   │   └── store.ts          # Zustand store
-│   ├── App.css                  # 全局样式
-│   ├── App.tsx                 # 主应用组件
-│   └── main.tsx                # 应用入口
-├── src-tauri/                  # Rust 后端
-│   ├── src/
-│   │   ├── lib.rs             # Tauri 主逻辑
-│   │   └── main.rs           # 应用入口
-│   ├── capabilities/            # 权限配置
-│   ├── Cargo.toml
-│   ├── tauri.conf.json
-│   └── README.md
-├── public/                     # 静态资源
-│   ├── models/                # Live2D 模型文件（Haru）
-│   ├── examples/             # 示例代码
-│   └── index.html
-├── dist/                        # 前端构建输出
-├── package.json                # 依赖管理
-├── tsconfig.json + tsconfig.node.json
-└── vite.config.ts
+├── src/                    # React 前端源码
+├── public/                 # 静态资源与 standalone 页面
+├── src-tauri/              # 最小 Tauri 2 桌面工程
+├── dist/                   # 前端构建输出
+├── package.json            # npm 脚本与依赖
+├── vite.config.ts          # Vite 配置（dev 端口 1420）
+├── README.md
+├── LIVE2D_SETUP.md
+├── LIVE2D_STATUS.md
+├── TAURI_STATUS.md
+├── TAURI_FIX_STATUS.md
+└── TEST_RESULTS.md
 ```
 
-## 当前状态
+## 当前阶段目标
 
-### ✅ 阶段 1 完成度：100%
+最小 Tauri 闭环已经达成，下一阶段不再是“恢复桌面工程存在性”，而是分层恢复桌宠能力：
 
-**已完成：**
-- ✅ 项目结构创建
-- ✅ Tauri 配置（透明窗口、无边框、alwaysOnTop）
-- ✅ 所有依赖安装
-- ✅ Zustand Store 实现
-- ✅ OpenClaw WebSocket 客户端
-- ✅ 所有 UI 组件（PetDisplay、MessageBubble、ChatDialog、MessageDetailModal）
-- ✅ 主应用组件
-- ✅ Rust 编译成功
-- ✅ Live2D SDK 下载和配置
-
-**进行中：**
-- 🔄 应用窗口启动中
-
-**待完成（阶段 2）：**
-- ⏳ Live2D 渲染器初始化
-- ⏳ Haru 模型加载
-- ⏳ 动画循环实现
-- ⏳ 动作和表情触发
-- ⏳ OpenClaw Gateway 完整连接和消息处理
-
-## 功能特性
-
-### 已实现
-- ✅  transparent 窗口
-- ✅ 无边框设计
-- ✅ 可拖动区域
-- ✅ Zustand Store 状态管理
-- ✅ WebSocket 客户端
-- ✅ 消息气泡 UI
-- ✅ 输入对话框
-- ✅ 消息详情弹窗
-- ✅ 系统托盘基础框架
-
-### 待实现（阶段 2-3）
-- ⏳ Live2D 动画渲染
-- ⏳ 动作和表情播放
-- ⏳ OpenClaw Gateway 完整连接和消息处理
+1. 保持桌面壳稳定
+2. 恢复 Live2D 桌面端渲染
+3. 恢复 OpenClaw Gateway 桌面端通信
+4. 最后再考虑插件、托盘、开机启动等增强能力
 
 ## 开发命令
 
 ```bash
-# 安装依赖（已完成）
+# 安装依赖
 npm install
 
-# 开发模式
-npm run tauri dev
+# 前端开发（浏览器）
+npm run dev
 
-# 构建生产版本
-npm run tauri build
-npm run tauri build
+# 前端构建
+npm run build
+
+# Tauri 桌面开发
+npm run tauri:dev
+
+# Tauri 桌面构建
+npm run tauri:build
 ```
+
+## 运行入口说明
+
+### 1. 浏览器开发入口
+
+```bash
+npm run dev
+```
+
+访问：`http://localhost:1420/`
+
+说明：
+- 用于验证 React 页面、Live2D 资源和前端交互
+- 适合纯前端调试
+
+### 2. Tauri 桌面入口
+
+```bash
+npm run tauri:dev
+npm run tauri:build
+```
+
+说明：
+- 这是当前桌面端主入口
+- `tauri:dev` 用于桌面开发
+- `tauri:build` 用于生成桌面构建产物
+
+### 3. 临时 standalone 页面
+
+文件：`public/standalone.html`
+
+说明：
+- 这是临时独立页面
+- 可用于快速展示桌宠样式和简单状态面板
+- 不能替代 Tauri 桌面入口
+
+## 已达成的桌面基线
+
+- 最小 `src-tauri` 工程已恢复
+- Vite 与 Tauri dev 端口已对齐
+- Windows 开发所需图标资源已生成
+- `tauri:dev` 已能启动桌面程序
+- `tauri:build` 已能生成桌面产物
+
+## 暂未纳入本轮恢复范围
+
+- websocket/dialog 等 Tauri 插件恢复
+- 系统托盘、开机启动
+- 高级透明窗口/原生系统集成
+- Live2D 与 Gateway 的完整桌面联调
 
 ## 技术栈
 
-- **前端框架**：React 18 + TypeScript
-- **状态管理**：Zustand 4.5
-- **渲染引擎**：Live2D Cubism SDK for Web
-- **桌面框架**：Tauri 2
-- **WebSocket**：@tauri-apps/plugin-websocket 2.0.0
-- **构建工具**：Vite 5
-- **Rust**：Tauri 2
+- React 18
+- TypeScript
+- Vite 5
+- Zustand
+- Live2D Cubism SDK for Web
+- Tauri 2
 
-## Live2D 配置
+## 下一阶段顺序
 
-### 已集成 SDK
+建议按以下顺序恢复：
 
-- **Core**：Live2D Cubism Core（必需）
-- **Framework**：Live2D Cubism Framework（必需）
-- **Haru 模型**：`public/models/Haru/` 目录
+1. 保持桌面壳稳定
+2. 恢复 Live2D 渲染
+3. 恢复 OpenClaw Gateway 通信
+4. 再恢复 Tauri 插件与高级桌面能力
 
-### Haru 模型详情
+## 相关文档
 
-**基本信息**
-- **模型名称**：Haru
-- **来源**：Live2D Cubism Web Samples
-- **许可证**：BSD（可在开源项目中使用）
-
-**模型文件包含**：
-- `Haru.moc3` - 模型文件
-- `Haru.model3.json` - 模型配置
-- `Haru.cdi3.json` - Cubism IDE 集成配置
-- `Haru.physics3.json` - 物理模拟配置
-- `Haru.pose3.json` - 动态定义
-
-**资源文件**：
-- `Haru.2048/` - 纹理目录
-  - `texture_00.png` - 纹理 0
-- `texture_01.png` - 纹理 1
-
-**动作文件**：
-- `motions/` - 动作目录
-  - `haru_g_idle.motion3.json` - 待机动画
-  - `haru_g_m01-27.motion3.json` - 27 个动作
-  - 其他动作
-
-**表情文件**：
-- `expressions/` - 8 个表情（F01-F08.exp3.json）
-
-**音频文件**：
-- `sounds/` - 4 个音效文件
-
-## OpenClaw 配置
-
-- **Gateway URL**：ws://127.0.0.1:18789
-- **角色**：operator
-- **作用域**：operator.read, operator.write
-- **认证**：无（默认配置）
-
-## 快速开始
-
-1. 运行应用
-   ```bash
-   npm run tauri dev
-   ```
-
-2. 测试 Live2D 模型
-   - 查看 Haru 在画布效果
-   - 测试点击动作和表情
-   - 测试消息显示
-
-3. 测试 OpenClaw 连接
-   - 检查 WebSocket 连接
-   - 测试消息发送和接收
-
-## 注意事项
-
-- **Live2D 模型加载**：首次加载可能需要时间（模型文件较大）
-- **动作触发**：确保使用正确的动作名称和索引
-- **性能**：Live2D 渲染需要较多资源，注意性能优化
-- **错误处理**：添加完善的错误处理和日志记录
-
-## 开发说明
-
-### 代码组织
-
-- `src/lib/live2d/`：Live2D SDK 集成
-  - `src/components/`：UI 组件
-- `src/state/`：状态管理
-- `src/lib/openclaw/`：OpenClaw 客户端
-
-### 扩展功能（后续阶段）
-
-- **阶段 4**：系统托盘
-- **阶段 5**：连接状态管理
-- **阶段 6**：配置界面
-- **阶段 7**：高级 Live2D 特性（物理、眼动等）
-
-## 许可证
-
-MIT License
-
-## 下一步
-
-1. 完成 Live2D 集成
-2. 完善错误处理
-3. 测试 OpenClaw Gateway 集成
-4. 添加系统托盘
-5. 优化性能
-
----
-
-**开始吧！**
+- `LIVE2D_SETUP.md`：Live2D 配置说明
+- `LIVE2D_STATUS.md`：Live2D 当前状态
+- `TAURI_STATUS.md`：Tauri 当前状态与最小闭环结果
+- `TAURI_FIX_STATUS.md`：Tauri 修复过程记录
+- `TEST_RESULTS.md`：已有测试与验证记录

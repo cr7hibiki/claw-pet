@@ -38,5 +38,8 @@ Thumbs.db
 src-tauri/target/
 src-tauri/Cargo.lock
 
+# Worktrees
+.worktrees/
+
 # Live2D (optional, depends on preferences)
 # public/models/*/Haru.2048/*.png

@@ -75,6 +75,16 @@ export function PetDisplay({ modelPath = '/models/Haru', modelName = 'Haru' }: P
         onClick={handleClick}
       />
 
+      {modelStatus === 'fallback' ? (
+        <div className="pet-placeholder-overlay" onClick={handleClick}>
+          <div className="pet-placeholder-card">
+            <div className="pet-icon">🦞</div>
+            <p className="pet-label">Claw-Pet</p>
+            <p className="pet-subtitle">Live2D fallback preview</p>
+          </div>
+        </div>
+      ) : null}
+
       {showInfo && (
         <div className="info-panel">
           <h3>🦞 Claw-Pet 状态</h3>

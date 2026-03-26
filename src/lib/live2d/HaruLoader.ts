@@ -1,12 +1,15 @@
 import * as PIXI from 'pixi.js';
+import { Ticker } from '@pixi/ticker';
 
 export class HaruLive2DLoader {
   private app: PIXI.Application | null = null;
   private placeholder: PIXI.Sprite | null = null;
   private modelLoaded = false;
   private animationFrame: number | null = null;
+  private destroyed = false;
 
   constructor(private canvas: HTMLCanvasElement) {
+    this.destroyed = false;
     this.initializePixi();
   }
 
@@ -21,23 +24,28 @@ export class HaruLive2DLoader {
         autoDensity: true,
       });
     } catch (error) {
-      console.error('Failed to initialize PIXI application, falling back to canvas placeholder:', error);
+      console.error('Failed to initialize PIXI application, falling back to UI placeholder:', error);
       this.app = null;
-      this.drawCanvasPlaceholder();
     }
   }
 
   async loadModel(modelDir: string, modelName: string = 'Haru'): Promise<boolean> {
     console.log(`Attempting to load model from: ${modelDir}/${modelName}`);
 
-    if (!this.app) {
-      this.drawCanvasPlaceholder();
+    if (!this.app || this.destroyed) {
       return false;
     }
 
     try {
-      const { Live2DModel } = await import('pixi-live2d-display');
-      const live2dModel = await Live2DModel.from(`${modelDir}/${modelName}.model3.json`);
+      const { Live2DModel } = await import('pixi-live2d-display/cubism4');
+      Live2DModel.registerTicker(Ticker);
+      const live2dModel = await Live2DModel.from(`${modelDir}/${modelName}.model3.json`, {
+        autoInteract: false,
+      });
+
+      if (!this.app || this.destroyed) {
+        return false;
+      }
 
       this.app.stage.removeChildren();
       this.app.stage.addChild(live2dModel as any);
@@ -135,20 +143,11 @@ export class HaruLive2DLoader {
   update(_deltaTime: number): void {
     if (this.placeholder) {
       this.placeholder.rotation += 0.001;
-      return;
-    }
-
-    if (!this.app) {
-      this.drawCanvasPlaceholder();
     }
   }
 
   playMotion(groupName: string, motionIndex: number = 0): void {
     console.log(`Motion requested: ${groupName}[${motionIndex}], but using placeholder`);
-
-    if (!this.placeholder && !this.app) {
-      this.drawCanvasPlaceholder();
-    }
   }
 
   setExpression(name: string): void {
@@ -156,6 +155,8 @@ export class HaruLive2DLoader {
   }
 
   destroy(): void {
+    this.destroyed = true;
+
     if (this.animationFrame !== null) {
       window.cancelAnimationFrame(this.animationFrame);
       this.animationFrame = null;
@@ -167,7 +168,7 @@ export class HaruLive2DLoader {
     }
 
     if (this.app) {
-      this.app.destroy(true);
+      this.app.destroy(false);
       this.app = null;
     }
   }

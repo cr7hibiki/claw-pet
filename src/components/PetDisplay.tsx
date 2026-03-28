@@ -51,7 +51,7 @@ export function PetDisplay({ modelPath = '/models/Haru', modelName = 'Haru' }: P
     window.dispatchEvent(new CustomEvent('open-chat-dialog'));
 
     if (loaderRef.current) {
-      loaderRef.current.playMotion('TapBody', 0);
+      loaderRef.current.playMotion('TapBody', Math.floor(Math.random() * 4));
     }
   };
 

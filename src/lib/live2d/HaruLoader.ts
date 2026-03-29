@@ -4,8 +4,11 @@ import { Ticker } from '@pixi/ticker';
 export class HaruLive2DLoader {
   private app: PIXI.Application | null = null;
   private placeholder: PIXI.Sprite | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private model: any = null;
   private modelLoaded = false;
   private animationFrame: number | null = null;
+  private idleTimer: number | null = null;
   private destroyed = false;
 
   constructor(private canvas: HTMLCanvasElement) {
@@ -50,15 +53,11 @@ export class HaruLive2DLoader {
       this.app.stage.removeChildren();
       this.app.stage.addChild(live2dModel as any);
 
-      const scale = Math.min(
-        (window.innerWidth * 0.8) / (live2dModel as any).width,
-        (window.innerHeight * 0.8) / (live2dModel as any).height,
-      );
-      live2dModel.scale.set(scale);
-      live2dModel.x = (window.innerWidth - (live2dModel as any).width * scale) / 2;
-      live2dModel.y = (window.innerHeight - (live2dModel as any).height * scale) / 2;
+      this.model = live2dModel;
+      this.positionModel();
 
       this.modelLoaded = true;
+      this.startIdleAnimation();
       console.log('Live2D model loaded successfully!');
       return true;
     } catch (error) {
@@ -140,6 +139,37 @@ export class HaruLive2DLoader {
     context.fillText('Live2D fallback preview', centerX, centerY + 106);
   }
 
+  private positionModel(): void {
+    if (!this.model) return;
+    const scale = Math.min(
+      (window.innerWidth * 0.8) / this.model.width,
+      (window.innerHeight * 0.8) / this.model.height,
+    );
+    this.model.scale.set(scale);
+    this.model.x = (window.innerWidth - this.model.width * scale) / 2;
+    this.model.y = (window.innerHeight - this.model.height * scale) / 2;
+  }
+
+  private startIdleAnimation(): void {
+    this.stopIdleAnimation();
+    let index = 0;
+    const playIdle = () => {
+      if (this.model && !this.destroyed) {
+        this.model.motion('Idle', index);
+        index = (index + 1) % 2;
+      }
+    };
+    playIdle();
+    this.idleTimer = window.setInterval(playIdle, 10000);
+  }
+
+  private stopIdleAnimation(): void {
+    if (this.idleTimer !== null) {
+      window.clearInterval(this.idleTimer);
+      this.idleTimer = null;
+    }
+  }
+
   update(_deltaTime: number): void {
     if (this.placeholder) {
       this.placeholder.rotation += 0.001;
@@ -147,20 +177,27 @@ export class HaruLive2DLoader {
   }
 
   playMotion(groupName: string, motionIndex: number = 0): void {
-    console.log(`Motion requested: ${groupName}[${motionIndex}], but using placeholder`);
+    if (this.model) {
+      this.model.motion(groupName, motionIndex);
+    }
   }
 
   setExpression(name: string): void {
-    console.log(`Expression requested: ${name}, but using placeholder`);
+    if (this.model) {
+      this.model.expression(name);
+    }
   }
 
   destroy(): void {
     this.destroyed = true;
+    this.stopIdleAnimation();
 
     if (this.animationFrame !== null) {
       window.cancelAnimationFrame(this.animationFrame);
       this.animationFrame = null;
     }
+
+    this.model = null;
 
     if (this.placeholder) {
       this.placeholder.destroy();
@@ -176,7 +213,9 @@ export class HaruLive2DLoader {
   resize(width: number, height: number): void {
     if (this.app) {
       this.app.renderer.resize(width, height);
-      if (this.placeholder) {
+      if (this.model) {
+        this.positionModel();
+      } else if (this.placeholder) {
         this.placeholder.x = width / 2;
         this.placeholder.y = height / 2;
         const scale = Math.min(

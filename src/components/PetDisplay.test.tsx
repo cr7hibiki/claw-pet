@@ -33,6 +33,8 @@ test('shows fallback overlay when live2d model fails to load', async () => {
 });
 
 test('plays tap motion on canvas click', async () => {
+  const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+
   const { container } = render(<PetDisplay />);
 
   await screen.findByText('Live2D fallback preview');
@@ -42,7 +44,9 @@ test('plays tap motion on canvas click', async () => {
 
   fireEvent.click(canvas!);
 
-  expect(mockPlayMotion).toHaveBeenCalledWith('TapBody', expect.any(Number));
+  expect(mockPlayMotion).toHaveBeenCalledWith('TapBody', 2);
+
+  randomSpy.mockRestore();
 });
 
 test('changes expression when expression button clicked', async () => {

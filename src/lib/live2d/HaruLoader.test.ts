@@ -73,10 +73,13 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
-test('loads Haru model from the expected model3 path', async () => {
+test('loads Haru model from the expected model3 path and starts idle motion loop', async () => {
+  vi.useFakeTimers();
+
   const model = {
     width: 400,
     height: 800,
@@ -93,6 +96,13 @@ test('loads Haru model from the expected model3 path', async () => {
 
   expect(mocks.registerTicker).toHaveBeenCalledTimes(1);
   expect(mocks.from).toHaveBeenCalledWith('/models/Haru/Haru.model3.json', expect.any(Object));
+  expect(mocks.modelMotion).toHaveBeenNthCalledWith(1, 'Idle', 0);
+
+  vi.advanceTimersByTime(10000);
+  expect(mocks.modelMotion).toHaveBeenNthCalledWith(2, 'Idle', 1);
+
+  vi.advanceTimersByTime(10000);
+  expect(mocks.modelMotion).toHaveBeenNthCalledWith(3, 'Idle', 0);
   expect(result).toBe(true);
 
   loader.destroy();

@@ -45,6 +45,14 @@
 ### 阶段 B：恢复 Live2D 桌面渲染
 目标：让桌面端稳定显示和交互 Live2D 模型。
 
+状态：2026-03-29 已完成 Stage B 验收。
+
+已确认：
+- Live2D 模型在桌面端可见
+- 点击宠物可触发动作
+- 表情按钮可切换表情
+- 加载失败时会显示 fallback preview，而不是空白
+
 重点：
 - 检查 `PetDisplay`、`Live2DPetDisplay`、`HaruLoader` 的桌面端表现
 - 验证模型路径、资源加载、动作和表情切换

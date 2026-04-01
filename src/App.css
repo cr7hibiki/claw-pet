@@ -9,8 +9,15 @@
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+}
+
+.app-container.runtime-browser {
   background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 40%),
     linear-gradient(140deg, #1e3a5f 0%, #275a7a 40%, #1a6c5f 100%);
+}
+
+.app-container.runtime-tauri {
+  background: transparent;
 }
 
 .status-bar {

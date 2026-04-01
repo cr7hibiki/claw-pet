@@ -62,11 +62,15 @@ export function PetDisplay({ modelPath = '/models/Haru', modelName = 'Haru' }: P
     }
   };
 
+  const isTauriRuntime = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
   return (
     <div className="pet-container">
-      <button className="info-toggle" onClick={() => setShowInfo((value) => !value)}>
-        {showInfo ? '隐藏状态' : '查看状态'}
-      </button>
+      {!isTauriRuntime ? (
+        <button className="info-toggle" onClick={() => setShowInfo((value) => !value)}>
+          {showInfo ? '隐藏状态' : '查看状态'}
+        </button>
+      ) : null}
 
       <canvas
         ref={canvasRef}
@@ -77,15 +81,19 @@ export function PetDisplay({ modelPath = '/models/Haru', modelName = 'Haru' }: P
 
       {modelStatus === 'fallback' ? (
         <div className="pet-placeholder-overlay" onClick={handleClick}>
-          <div className="pet-placeholder-card">
-            <div className="pet-icon">🦞</div>
-            <p className="pet-label">Claw-Pet</p>
-            <p className="pet-subtitle">Live2D fallback preview</p>
-          </div>
+          {!isTauriRuntime ? (
+            <div className="pet-placeholder-card">
+              <div className="pet-icon">🦞</div>
+              <p className="pet-label">Claw-Pet</p>
+              <p className="pet-subtitle">Live2D fallback preview</p>
+            </div>
+          ) : (
+            <div className="pet-placeholder-chip">Claw-Pet</div>
+          )}
         </div>
       ) : null}
 
-      {showInfo && (
+      {!isTauriRuntime && showInfo ? (
         <div className="info-panel">
           <h3>🦞 Claw-Pet 状态</h3>
           <div className="status-item">
@@ -134,7 +142,7 @@ export function PetDisplay({ modelPath = '/models/Haru', modelName = 'Haru' }: P
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

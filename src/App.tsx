@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { PetDisplay } from './components/PetDisplay';
 import { MessageBubble } from './components/MessageBubble';
 import { MessageDetailModal } from './components/MessageDetailModal';
@@ -9,7 +10,6 @@ import './App.css';
 function App() {
   const {
     connected,
-    connectionStatus,
     currentMessage,
     messages,
     connectToGateway,
@@ -33,21 +33,32 @@ function App() {
     };
   }, [connectToGateway, disconnectFromGateway, isTauriRuntime]);
 
+  useEffect(() => {
+    if (!isTauriRuntime) {
+      return;
+    }
+
+    void getCurrentWindow().setShadow(false);
+  }, [isTauriRuntime]);
+
   const latestMessage = messages[messages.length - 1];
   const bubbleContent = latestMessage?.content || currentMessage;
-  const statusText = isTauriRuntime ? connectionStatus : 'browser preview';
+  const statusText = 'browser preview';
+  const appClassName = `app-container ${isTauriRuntime ? 'runtime-tauri' : 'runtime-browser'}`;
 
   return (
-    <div className="app-container" data-tauri-drag-region>
-      <div className="status-bar">
-        <span className={`status-dot ${connected ? 'ok' : 'warn'}`} />
-        <span className="status-text">Gateway: {statusText}</span>
-        {isTauriRuntime && !connected ? (
-          <button className="reconnect-button" onClick={() => void connectToGateway()}>
-            重连
-          </button>
-        ) : null}
-      </div>
+    <div className={appClassName} data-tauri-drag-region>
+      {!isTauriRuntime ? (
+        <div className="status-bar">
+          <span className={`status-dot ${connected ? 'ok' : 'warn'}`} />
+          <span className="status-text">Gateway: {statusText}</span>
+          {!connected ? (
+            <button className="reconnect-button" onClick={() => void connectToGateway()}>
+              重连
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       <PetDisplay />
 

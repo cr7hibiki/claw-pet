@@ -14,11 +14,14 @@
       {
         "label": "main",
         "title": "Claw-Pet",
-        "width": 960,
-        "height": 720,
-        "resizable": true,
+        "width": 360,
+        "height": 520,
+        "resizable": false,
         "fullscreen": false,
-        "visible": true
+        "visible": true,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true
       }
     ],
     "security": {
